@@ -3,76 +3,61 @@ import uuid
 import cv2
 import time
 import sys
+import re
+from pathlib import Path
 #import threading
 import concurrent.futures
 from jetcam.csi_camera import CSICamera
 from jetcam.utils import bgr8_to_jpeg
 
-cptflg = True 
+def FileCntContinue(fullpathdir):
+    filesobj = Path(fullpathdir)
+    files = list(filesobj.glob('*.jpg'))
+    fileindexmax = -1
+    for file in files:
+        strtmp = os.path.basename(file)
+        strtmp = strtmp[:strtmp.find('_')]
+        numtmp = int(strtmp.strip('cnt'))
+        if numtmp > fileindexmax:
+            fileindexmax = numtmp
+    return fileindexmax
 
-def CameraCpt(invl):
-    global cptflg
+def CameraCptCnt(invl, cntmax, fullpathdir):
+
+    # ./cpt => cpt, cpt/ => cpt
+    # diff_path = diff_path.strip('./')
+    # pwdpath = os.getcwd()
+    # pwdpath = os.path.abspath(__file__)
+    # pwdpath = os.path.dirname(__file__)
+    if not fullpathdir.endswith('/'):
+        fullpathdir = fullpathdir + '/'
+    cntstart = FileCntContinue(fullpathdir) + 1
     camera = CSICamera(width=224, height=224)
     camera.running = True
     camera.unobserve_all()
     #image = camera.read()
     # print(image)
-    cont = 0
-    while cptflg:
-        print("#CPT!" & cont)
+    # 最初の一枚はなぜかノイズだらけなので捨てる。
+    value = camera.value
+    for count in range(cntmax):
         value = camera.value
-        filename = '%d_%d_%s.jpg' % (0, 0, str(uuid.uuid1()))
-        cv2.imwrite(filename, value)
-        time.sleep(invl)
-        cont += 1
-
-def CameraCptCnt(invl, cntmax):
-    camera = CSICamera(width=224, height=224)
-    camera.running = True
-    camera.unobserve_all()
-    #image = camera.read()
-    # print(image)
-    for cont in range(cntmax):
-        value = camera.value
-        filename = '%d_%d_%s.jpg' % (0, 0, str(uuid.uuid1()))
-        cv2.imwrite(filename, value)
+        # /home/jetson/jetracer + '/' + cpt + '/' + cnt123_0_0_uuid.jp
+        filename = 'cnt%d_%d_%d_%s.jpg' % (count + cntstart, 0, 0, str(uuid.uuid1()))
+        # filefullpath = pwdpath + '/' + diff_path + '/' + filename
+        filefullpath = fullpathdir + filename
+        cv2.imwrite(filefullpath, value)
         time.sleep(invl)
 
-def CameraCptCtl(StartStop) :
-    global cptflg
-    if StartStop:
-        cptflg = True
-    else:
-        cptflg = False
-
-def CameraCptCtlUsrCmd() :
-    global cptflg
-    loopflg = True
-    while loopflg:
-        print("(g,s)>>")
-        char = imput() 
-        if char == 'g':
-            # go
-            cptflg = True 
-            loopflg = True
-        elif char == 's':
-            # stop
-            cptflg = False
-            loopflg = True
-        else:
-            loopflg = False 
 
 
 if  __name__ == "__main__":
-    cptflg = True
 
     # executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
 
     # executor.submit(CameraCptCtlUsrCmd)
     # executor.submit(CameraCpt)
     print("start cpt")
-    CameraCptCnt(1, 10)
-    sys.exit()
+    CameraCptCnt(1, 10, "/home/jetson/jetracer/csicamintv/cpt/")
 """ 
 
 
