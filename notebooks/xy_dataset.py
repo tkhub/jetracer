@@ -71,6 +71,19 @@ class XYDataset(torch.utils.data.Dataset):
         cv2.imwrite(image_path, image)
         self.refresh()
         
+    """ def load_entry(self, category, suffix, cnt, image):
+        # apex_pre(例)のパスを生成
+        category_dir = os.path.join(self.directory, (category + suffix))
+        
+        
+
+        filename = '%d_%d_%s.jpg' % (x, y, str(uuid.uuid1()))
+        
+        image_path = os.path.join(category_dir, filename)
+        cv2.imwrite(image_path, image)
+        self.refresh() """
+
+
     def get_count(self, category):
         i = 0
         for a in self.annotations:

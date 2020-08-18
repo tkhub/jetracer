@@ -46,6 +46,7 @@ def CameraCptCnt(invl, cntmax, fullpathdir):
         # filefullpath = pwdpath + '/' + diff_path + '/' + filename
         filefullpath = fullpathdir + filename
         cv2.imwrite(filefullpath, value)
+        print(count)
         time.sleep(invl)
 
 
@@ -57,7 +58,7 @@ if  __name__ == "__main__":
     # executor.submit(CameraCptCtlUsrCmd)
     # executor.submit(CameraCpt)
     print("start cpt")
-    CameraCptCnt(1, 10, "/home/jetson/jetracer/csicamintv/cpt/")
+    CameraCptCnt(0.1, 120, "/home/jetson/jetracer/csicamintv/cpt/")
 """ 
 
 
